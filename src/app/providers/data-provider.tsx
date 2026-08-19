@@ -7,12 +7,13 @@ import {
   useState,
   type ReactNode,
 } from 'react'
-import type { Category, Project, Task, TimeBlock, UserProfile } from '@/domain/types'
+import type { Category, Habit, HabitCompletion, Project, Task, TimeBlock, UserProfile } from '@/domain/types'
 import { createLocalStorageAdapter } from '@/storage/adapter'
 import { createEmptyDatabase, isValidDatabase, loadDatabase, nowIso, saveDatabase } from '@/storage/database'
 import { createRepositories } from '@/repositories/local'
 import type {
   NewCategory,
+  NewHabit,
   NewProject,
   NewTask,
   NewTimeBlock,
@@ -26,6 +27,8 @@ interface DataContextValue {
   timeBlocks: TimeBlock[]
   projects: Project[]
   categories: Category[]
+  habits: Habit[]
+  habitCompletions: HabitCompletion[]
 
   saveProfile: (profile: UserProfile) => Promise<void>
 
@@ -49,6 +52,11 @@ interface DataContextValue {
   updateCategory: (category: Category) => Promise<void>
   deleteCategory: (id: string) => Promise<void>
 
+  createHabit: (input: NewHabit) => Promise<Habit>
+  updateHabit: (habit: Habit) => Promise<void>
+  deleteHabit: (id: string) => Promise<void>
+  toggleHabitCompletion: (habitId: string, date: string) => Promise<void>
+
   exportData: () => string
   importData: (json: string) => Promise<void>
   clearAllData: () => Promise<void>
@@ -66,17 +74,21 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [timeBlocks, setTimeBlocks] = useState<TimeBlock[]>([])
   const [projects, setProjects] = useState<Project[]>([])
   const [categories, setCategories] = useState<Category[]>([])
+  const [habits, setHabits] = useState<Habit[]>([])
+  const [habitCompletions, setHabitCompletions] = useState<HabitCompletion[]>([])
 
   useEffect(() => {
     let cancelled = false
     async function load() {
-      const [profileResult, taskResult, blockResult, projectResult, categoryResult] =
+      const [profileResult, taskResult, blockResult, projectResult, categoryResult, habitResult, habitCompletionResult] =
         await Promise.all([
           repositories.profile.get(),
           repositories.task.getAll(),
           repositories.timeBlock.getAll(),
           repositories.project.getAll(),
           repositories.category.getAll(),
+          repositories.habit.getAll(),
+          repositories.habitCompletion.getAll(),
         ])
       if (cancelled) return
       setProfile(profileResult)
@@ -84,6 +96,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
       setTimeBlocks(blockResult)
       setProjects(projectResult)
       setCategories(categoryResult)
+      setHabits(habitResult)
+      setHabitCompletions(habitCompletionResult)
       setReady(true)
     }
     void load()
@@ -104,6 +118,12 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const refreshCategories = useCallback(async () => {
     setCategories(await repositories.category.getAll())
   }, [])
+  const refreshHabits = useCallback(async () => {
+    setHabits(await repositories.habit.getAll())
+  }, [])
+  const refreshHabitCompletions = useCallback(async () => {
+    setHabitCompletions(await repositories.habitCompletion.getAll())
+  }, [])
 
   const value = useMemo<DataContextValue>(() => {
     return {
@@ -113,6 +133,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
       timeBlocks,
       projects,
       categories,
+      habits,
+      habitCompletions,
 
       async saveProfile(newProfile) {
         await repositories.profile.save(newProfile)
@@ -224,6 +246,34 @@ export function DataProvider({ children }: { children: ReactNode }) {
         await refreshCategories()
       },
 
+      async createHabit(input) {
+        const habit = await repositories.habit.create(input)
+        await refreshHabits()
+        return habit
+      },
+      async updateHabit(habit) {
+        await repositories.habit.update(habit)
+        await refreshHabits()
+      },
+      async deleteHabit(id) {
+        await repositories.habit.delete(id)
+        await repositories.habitCompletion.deleteForHabit(id)
+        await refreshHabits()
+        await refreshHabitCompletions()
+      },
+      async toggleHabitCompletion(habitId, date) {
+        const existing = await repositories.habitCompletion.getAll()
+        const found = existing.find(
+          (completion) => completion.habitId === habitId && completion.date === date,
+        )
+        if (found) {
+          await repositories.habitCompletion.delete(found.id)
+        } else {
+          await repositories.habitCompletion.create({ habitId, date })
+        }
+        await refreshHabitCompletions()
+      },
+
       exportData() {
         return JSON.stringify(loadDatabase(adapter), null, 2)
       },
@@ -233,19 +283,23 @@ export function DataProvider({ children }: { children: ReactNode }) {
           throw new Error('Invalid backup file')
         }
         saveDatabase(adapter, parsed)
-        const [profileResult, taskResult, blockResult, projectResult, categoryResult] =
+        const [profileResult, taskResult, blockResult, projectResult, categoryResult, habitResult, habitCompletionResult] =
           await Promise.all([
             repositories.profile.get(),
             repositories.task.getAll(),
             repositories.timeBlock.getAll(),
             repositories.project.getAll(),
             repositories.category.getAll(),
+            repositories.habit.getAll(),
+            repositories.habitCompletion.getAll(),
           ])
         setProfile(profileResult)
         setTasks(taskResult)
         setTimeBlocks(blockResult)
         setProjects(projectResult)
         setCategories(categoryResult)
+        setHabits(habitResult)
+        setHabitCompletions(habitCompletionResult)
       },
       async clearAllData() {
         saveDatabase(adapter, createEmptyDatabase())
@@ -254,9 +308,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
         setTimeBlocks([])
         setProjects([])
         setCategories([])
+        setHabits([])
+        setHabitCompletions([])
       },
     }
-  }, [ready, profile, tasks, timeBlocks, projects, categories, refreshTasks, refreshTimeBlocks, refreshProjects, refreshCategories])
+  }, [ready, profile, tasks, timeBlocks, projects, categories, habits, habitCompletions, refreshTasks, refreshTimeBlocks, refreshProjects, refreshCategories, refreshHabits, refreshHabitCompletions])
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>
 }

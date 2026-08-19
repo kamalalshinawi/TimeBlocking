@@ -65,3 +65,26 @@ export interface Category {
   createdAt: string
   updatedAt: string
 }
+
+export type HabitFrequency = 'daily' | 'weekly' | 'custom'
+
+export interface Habit {
+  id: string
+  name: string
+  description: string
+  color: string
+  icon: string
+  frequency: HabitFrequency
+  daysOfWeek: number[]
+  weeklyTarget: number
+  archived: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+export interface HabitCompletion {
+  id: string
+  habitId: string
+  date: string
+  completedAt: string
+}
