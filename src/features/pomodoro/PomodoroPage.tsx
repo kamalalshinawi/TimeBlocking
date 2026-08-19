@@ -30,9 +30,9 @@ import { formatTime, parseIso } from '@/utils/date/format'
 import { cn } from '@/lib/utils'
 
 const PHASE_META: Record<PomodoroPhase, { label: string; color: string; ring: string }> = {
-  focus: { label: 'Focus', color: 'text-red-600 dark:text-red-400', ring: '#ef4444' },
-  'short-break': { label: 'Short break', color: 'text-emerald-600 dark:text-emerald-400', ring: '#10b981' },
-  'long-break': { label: 'Long break', color: 'text-blue-600 dark:text-blue-400', ring: '#3b82f6' },
+  focus: { label: 'Focus', color: 'text-[#e5484d] dark:text-[#ff6369]', ring: '#e5484d' },
+  'short-break': { label: 'Short break', color: 'text-[#30a46c] dark:text-[#3dd68c]', ring: '#30a46c' },
+  'long-break': { label: 'Long break', color: 'text-[#5b5bd6] dark:text-[#8493ff]', ring: '#5b5bd6' },
 }
 
 function phaseSessionLabel(sessionPhase: PomodoroPhase, focusCycleCount: number, settings: PomodoroSettings): string {

@@ -61,12 +61,12 @@ export function createEmptyDatabase(): Database {
 }
 
 const defaultCategories: Omit<Category, 'createdAt' | 'updatedAt'>[] = [
-  { id: 'category-study', name: 'Study', color: '#3b82f6' },
-  { id: 'category-work', name: 'Work', color: '#10b981' },
-  { id: 'category-programming', name: 'Programming', color: '#8b5cf6' },
-  { id: 'category-personal', name: 'Personal', color: '#f59e0b' },
-  { id: 'category-exercise', name: 'Exercise', color: '#ef4444' },
-  { id: 'category-other', name: 'Other', color: '#6b7280' },
+  { id: 'category-study', name: 'Study', color: '#4f46e5' },
+  { id: 'category-work', name: 'Work', color: '#0d9488' },
+  { id: 'category-programming', name: 'Programming', color: '#7c3aed' },
+  { id: 'category-personal', name: 'Personal', color: '#d97706' },
+  { id: 'category-exercise', name: 'Exercise', color: '#e11d48' },
+  { id: 'category-other', name: 'Other', color: '#64748b' },
 ]
 
 export function createSeedDatabase(): Database {
