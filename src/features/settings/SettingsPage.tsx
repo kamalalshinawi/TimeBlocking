@@ -182,8 +182,9 @@ export function SettingsPage() {
               <AlertDialogHeader>
                 <AlertDialogTitle>Clear all data?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  This permanently deletes your profile, tasks, time blocks, projects, habits, and
-                  categories from this browser. Export a backup first if you want to keep your data.
+                  This permanently deletes your profile, tasks, time blocks, projects, habits,
+                  pomodoro sessions, and categories from this browser. Export a backup first if you
+                  want to keep your data.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>

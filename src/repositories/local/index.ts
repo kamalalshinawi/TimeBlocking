@@ -1,8 +1,11 @@
 import type { StorageAdapter } from '@/storage/adapter'
 import type {
+  ActivePomodoroRepository,
   CategoryRepository,
   HabitCompletionRepository,
   HabitRepository,
+  PomodoroSessionRepository,
+  PomodoroSettingsRepository,
   ProfileRepository,
   ProjectRepository,
   TaskRepository,
@@ -19,6 +22,11 @@ import {
   createLocalHabitCompletionRepository,
   createLocalHabitRepository,
 } from '@/repositories/local/habit-repository'
+import {
+  createLocalActivePomodoroRepository,
+  createLocalPomodoroSessionRepository,
+  createLocalPomodoroSettingsRepository,
+} from '@/repositories/local/pomodoro-repository'
 
 export interface Repositories {
   task: TaskRepository
@@ -28,6 +36,9 @@ export interface Repositories {
   profile: ProfileRepository
   habit: HabitRepository
   habitCompletion: HabitCompletionRepository
+  pomodoroSettings: PomodoroSettingsRepository
+  pomodoroSession: PomodoroSessionRepository
+  activePomodoro: ActivePomodoroRepository
 }
 
 export function createRepositories(adapter: StorageAdapter): Repositories {
@@ -39,5 +50,8 @@ export function createRepositories(adapter: StorageAdapter): Repositories {
     profile: createLocalProfileRepository(adapter),
     habit: createLocalHabitRepository(adapter),
     habitCompletion: createLocalHabitCompletionRepository(adapter),
+    pomodoroSettings: createLocalPomodoroSettingsRepository(adapter),
+    pomodoroSession: createLocalPomodoroSessionRepository(adapter),
+    activePomodoro: createLocalActivePomodoroRepository(adapter),
   }
 }

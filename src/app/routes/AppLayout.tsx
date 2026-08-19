@@ -163,7 +163,7 @@ export function AppLayout() {
 
         <nav
           aria-label="Main navigation"
-          className="sticky bottom-0 z-30 grid grid-cols-7 border-t bg-background/95 backdrop-blur md:hidden"
+          className="sticky bottom-0 z-30 grid grid-cols-8 border-t bg-background/95 backdrop-blur md:hidden"
         >
           {navItems.map((item) => (
             <NavLink
