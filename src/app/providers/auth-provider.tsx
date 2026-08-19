@@ -7,7 +7,7 @@ import {
   useState,
   type ReactNode,
 } from 'react'
-import type { User } from '@supabase/supabase-js'
+import type { SupabaseClient, User } from '@supabase/supabase-js'
 import { createClient } from '@/utils/supabase/client'
 
 interface AuthContextValue {
@@ -19,11 +19,32 @@ interface AuthContextValue {
   signOut: () => Promise<void>
 }
 
+type ClientState =
+  | { type: 'ready'; client: SupabaseClient }
+  | { type: 'error'; message: string }
+
 const AuthContext = createContext<AuthContextValue | null>(null)
 
-const supabase = createClient()
+function ConfigErrorScreen({ message }: { message: string }) {
+  return (
+    <div className="flex min-h-svh flex-col items-center justify-center gap-3 p-4 text-center">
+      <p className="text-xl font-semibold">TimeBlocking can't start</p>
+      <p className="max-w-md text-sm text-muted-foreground">{message}</p>
+    </div>
+  )
+}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const [clientState] = useState<ClientState>(() => {
+    try {
+      return { type: 'ready', client: createClient() }
+    } catch (err) {
+      return {
+        type: 'error',
+        message: err instanceof Error ? err.message : 'Could not connect to Supabase.',
+      }
+    }
+  })
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [oauthError, setOauthError] = useState<string | null>(() => {
@@ -34,6 +55,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   })
 
   useEffect(() => {
+    if (clientState.type !== 'ready') return
+    const supabaseClient = clientState.client
+
     let active = true
 
     const params = new URLSearchParams(window.location.search)
@@ -45,7 +69,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       window.history.replaceState({}, '', newUrl)
     }
 
-    supabase.auth
+    supabaseClient.auth
       .getSession()
       .then(({ data }) => {
         if (!active) return
@@ -58,7 +82,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setLoading(false)
       })
 
-    const { data: subscription } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: subscription } = supabaseClient.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null)
       setLoading(false)
     })
@@ -67,20 +91,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       active = false
       subscription.subscription.unsubscribe()
     }
-  }, [])
+  }, [clientState])
 
   const signInWithGoogle = useCallback(async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
+    if (clientState.type !== 'ready') throw new Error('Supabase is not configured.')
+    const { error } = await clientState.client.auth.signInWithOAuth({
       provider: 'google',
       options: { redirectTo: window.location.origin },
     })
     if (error) throw error
-  }, [])
+  }, [clientState])
 
   const signOut = useCallback(async () => {
-    const { error } = await supabase.auth.signOut()
+    if (clientState.type !== 'ready') throw new Error('Supabase is not configured.')
+    const { error } = await clientState.client.auth.signOut()
     if (error) throw error
-  }, [])
+  }, [clientState])
 
   const clearOauthError = useCallback(() => setOauthError(null), [])
 
@@ -88,6 +114,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     () => ({ user, loading, oauthError, clearOauthError, signInWithGoogle, signOut }),
     [user, loading, oauthError, clearOauthError, signInWithGoogle, signOut],
   )
+
+  if (clientState.type === 'error') {
+    return <ConfigErrorScreen message={clientState.message} />
+  }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

@@ -77,6 +77,17 @@ The app signs in with Google through Supabase Auth. After creating your project:
 
 If a sign-in fails, the app now shows the error returned by Google/Supabase on the login page instead of silently doing nothing.
 
+### Deploying to Vercel
+
+Your `.env` file is **not** uploaded to Vercel. If you deploy without the keys, the app crashes to a white page. Before/after deploying:
+
+1. Vercel → your project → **Settings → Environment Variables**
+2. Add both, one for each environment (Production/Preview):
+   - `VITE_SUPABASE_URL` = `https://<your-project>.supabase.co`
+   - `VITE_SUPABASE_ANON_KEY` = your anon key
+3. **Redeploy** the project (Deployments → ⋯ → Redeploy).
+4. Also add the production URL to Supabase → Authentication → URL Configuration → Redirect URLs (e.g. `https://your-app.vercel.app`).
+
 ## Scripts
 
 | Command | Description |

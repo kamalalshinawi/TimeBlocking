@@ -6,17 +6,20 @@ import { DataProvider } from '@/app/providers/data-provider'
 import { ThemeProvider } from '@/app/providers/theme-provider'
 import { AuthProvider } from '@/app/providers/auth-provider'
 import { ToastProvider } from '@/components/shared/toast'
+import { ErrorBoundary } from '@/components/shared/error-boundary'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <ThemeProvider>
-      <AuthProvider>
-        <DataProvider>
-          <ToastProvider>
-            <AppRouter />
-          </ToastProvider>
-        </DataProvider>
-      </AuthProvider>
-    </ThemeProvider>
+    <ErrorBoundary>
+      <ThemeProvider>
+        <AuthProvider>
+          <DataProvider>
+            <ToastProvider>
+              <AppRouter />
+            </ToastProvider>
+          </DataProvider>
+        </AuthProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
   </StrictMode>,
 )
