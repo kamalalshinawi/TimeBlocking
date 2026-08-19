@@ -23,7 +23,7 @@ import {
 import { HABIT_ICON_KEYS, getHabitIcon } from '@/features/habits/habit-icons'
 import { cn } from '@/lib/utils'
 
-const DEFAULT_COLOR = '#3b82f6'
+const DEFAULT_COLOR = '#4f46e5'
 const WEEKDAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 const FREQUENCY_LABELS: Record<HabitFrequency, string> = {
   daily: 'Every day',

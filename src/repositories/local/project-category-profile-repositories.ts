@@ -24,7 +24,7 @@ export function createLocalProjectRepository(adapter: StorageAdapter): ProjectRe
         id: generateId(),
         name: input.name,
         description: input.description ?? '',
-        color: input.color ?? '#3b82f6',
+        color: input.color ?? '#4f46e5',
         createdAt: timestamp,
         updatedAt: timestamp,
       }
@@ -63,7 +63,7 @@ export function createLocalCategoryRepository(adapter: StorageAdapter): Category
       const category: Category = {
         id: generateId(),
         name: input.name,
-        color: input.color ?? '#6b7280',
+        color: input.color ?? '#64748b',
         createdAt: timestamp,
         updatedAt: timestamp,
       }

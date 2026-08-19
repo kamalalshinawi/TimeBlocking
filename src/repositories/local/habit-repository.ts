@@ -18,7 +18,7 @@ export function createLocalHabitRepository(adapter: StorageAdapter): HabitReposi
         id: generateId(),
         name: input.name,
         description: input.description ?? '',
-        color: input.color ?? '#3b82f6',
+        color: input.color ?? '#4f46e5',
         icon: input.icon ?? 'Sparkles',
         frequency: input.frequency ?? 'daily',
         daysOfWeek: input.daysOfWeek ?? [],

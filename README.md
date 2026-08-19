@@ -1,21 +1,50 @@
 # TimeBlocking
 
-A **local-first** calendar and task manager with **time-block execution**.
+A **local-first** productivity suite that combines a **calendar**, **task manager**, **habit tracker**, and **pomodoro timer** around one core idea:
 
-TimeBlocking combines a calendar and a task manager with live time-block execution. You schedule a task as a block on the calendar (for example "Study React Native, 6:00 PM → 7:30 PM") and TimeBlocking guides you through it:
+> A calendar tells you what you scheduled. TimeBlocking helps you actually do it.
 
-- **Before the block** → "Starts in 45 minutes"
-- **During the block** → "ACTIVE — 01:30:00 remaining"
-- **When finished** → "COMPLETED"
-- **If time runs out** → "OVERDUE"
+Schedule a task as a block on the calendar — e.g. *“Study React Native, 6:00 PM → 7:30 PM”* — and TimeBlocking guides you through execution:
+
+- **Before the block** → “Starts in 45 minutes”
+- **During the block** → “ACTIVE — 01:30:00 remaining”
+- **When you finish** → “COMPLETED”
+- **If time runs out** → “OVERDUE”
 
 You can **complete**, **extend**, or **reschedule** every block.
 
+---
+
+## Features
+
+### Planning
+- **Calendar** — day, week, and month views with drag-and-drop, resizing, and conflict detection
+- **Time blocks** — schedule tasks as visual blocks with live state (`UPCOMING`, `ACTIVE`, `COMPLETED`, `OVERDUE`, `MISSED`)
+- **Tasks** — search, filter, sort, priorities, projects, categories, and subtasks with progress
+- **Projects & categories** — organize everything with colors
+
+### Execution
+- **Live countdown** — timestamp-based, survives refresh, tab switching, and computer sleep
+- **Current / next task** — the dashboard and Today view always show what to do now
+- **Extend & reschedule** — adjust blocks on the fly while preserving the original schedule
+
+### Routines
+- **Habit tracker** — daily / weekly / custom habits with streaks, completion stats, and a 12-week heatmap
+- **Pomodoro timer** — timestamp-based focus/break timer with task linking, auto-start options, sound, and daily statistics
+
+### Data
+- **Local-first** — all data stays in your browser
+- **Export / import** — versioned JSON backups with validation
+- **Dark mode** — fully themed, system-aware
+
+---
+
 ## Current Status
 
-**Phases 0–12 are implemented** (project foundation through polish).
+**Phases 0–12 are implemented** (project foundation through polish), plus two features built on top:
 
-The application supports local profiles, calendar day/week/month views with drag-and-resize and conflict detection, a time-block state engine, live countdowns, task execution (complete/extend/reschedule), task management (projects, categories, priorities, subtasks), a dashboard, a today view, and JSON import/export.
+- **Feature 14 — Habit Tracker**
+- **Feature 15 — Pomodoro Timer**
 
 Phase 13 (cloud sync, calendar integrations, AI scheduling) is intentionally **not implemented** yet.
 
@@ -28,7 +57,7 @@ Google sign-in/sign-up/sign-out via **Supabase Auth** is implemented. It provide
 | Framework | React 19 |
 | Language | TypeScript |
 | Build tool | Vite |
-| Styling | Tailwind CSS |
+| Styling | Tailwind CSS (custom indigo design system) |
 | UI components | shadcn/ui |
 | Icons | Lucide |
 
@@ -75,7 +104,7 @@ The app signs in with Google through Supabase Auth. After creating your project:
 3. **Allow the app URL** — in Supabase: Authentication → URL Configuration. Set the Site URL and add your app URLs to Redirect URLs, e.g. `http://localhost:5173` and any deployed domain.
 4. **Allow your Google account** — in Google Cloud Console → OAuth consent screen: if the app is in *Testing* mode, add the Google accounts you want to test with as **Test users**. Accounts that are not test users are blocked by Google, which looks like "it worked once, then nothing happens in another browser".
 
-If a sign-in fails, the app now shows the error returned by Google/Supabase on the login page instead of silently doing nothing.
+If a sign-in fails, the app shows the error returned by Google/Supabase on the login page instead of silently doing nothing.
 
 ### Deploying to Vercel
 
@@ -95,6 +124,7 @@ Your `.env` file is **not** uploaded to Vercel. If you deploy without the keys, 
 | `npm run dev` | Start the Vite dev server |
 | `npm run build` | Type-check and build for production |
 | `npm run typecheck` | Run the TypeScript type checker |
+| `npm run test` | Run the Vitest test suite |
 | `npm run lint` | Run the oxlint linter |
 | `npm run preview` | Preview the production build |
 
@@ -116,6 +146,8 @@ Your `.env` file is **not** uploaded to Vercel. If you deploy without the keys, 
 | 11 | Import/Export | ✅ |
 | 12 | Polish, Responsive Design & Accessibility | ✅ |
 | 13 | Future Features | ⏳ planned |
+| 14 | Habit Tracker | ✅ |
+| 15 | Pomodoro Timer | ✅ |
 
 Full details in [docs/DEVELOPMENT_PLAN.md](docs/DEVELOPMENT_PLAN.md).
 
