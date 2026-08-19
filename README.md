@@ -17,7 +17,9 @@ You can **complete**, **extend**, or **reschedule** every block.
 
 The application supports local profiles, calendar day/week/month views with drag-and-resize and conflict detection, a time-block state engine, live countdowns, task execution (complete/extend/reschedule), task management (projects, categories, priorities, subtasks), a dashboard, a today view, and JSON import/export.
 
-Phase 13 (Supabase, cloud sync, calendar integrations, AI scheduling) is intentionally **not implemented** yet.
+Phase 13 (cloud sync, calendar integrations, AI scheduling) is intentionally **not implemented** yet.
+
+Google sign-in/sign-up/sign-out via **Supabase Auth** is implemented. It provides identity only — all application data stays local.
 
 ## Technology
 
@@ -30,7 +32,7 @@ Phase 13 (Supabase, cloud sync, calendar integrations, AI scheduling) is intenti
 | UI components | shadcn/ui |
 | Icons | Lucide |
 
-All data stays in the browser. There is no backend.
+All application data stays in the browser. Supabase is used only for Google sign-in, not for storing application data.
 
 ## Architecture
 
@@ -63,6 +65,17 @@ Requirements: Node.js (current LTS or newer) and npm.
 npm install     # install dependencies
 npm run dev     # start the dev server
 ```
+
+## Google Sign-In Setup (Supabase)
+
+The app signs in with Google through Supabase Auth. After creating your project:
+
+1. **Add your credentials** — copy your project URL and anon key into `.env` (see `.env.example`).
+2. **Enable Google** — in Supabase: Authentication → Providers → Google → enable, and paste your Google OAuth Client ID and Client Secret.
+3. **Allow the app URL** — in Supabase: Authentication → URL Configuration. Set the Site URL and add your app URLs to Redirect URLs, e.g. `http://localhost:5173` and any deployed domain.
+4. **Allow your Google account** — in Google Cloud Console → OAuth consent screen: if the app is in *Testing* mode, add the Google accounts you want to test with as **Test users**. Accounts that are not test users are blocked by Google, which looks like "it worked once, then nothing happens in another browser".
+
+If a sign-in fails, the app now shows the error returned by Google/Supabase on the login page instead of silently doing nothing.
 
 ## Scripts
 

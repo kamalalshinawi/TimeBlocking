@@ -27,14 +27,15 @@ The current V1 structure:
 ```text
 src/
 ├── app/
-│   ├── routes/                  (routing, layout, navigation)
-│   └── providers/               (data provider, theme provider)
+│   ├── routes/                  (routing, layout, navigation, auth guard)
+│   └── providers/               (data provider, theme provider, auth provider)
 │
 ├── components/
 │   ├── ui/                      (shadcn/ui primitives)
 │   └── shared/                  (countdown, status badge, actions, toast, empty states)
 │
 ├── features/
+│   ├── auth/                    (login page)
 │   ├── calendar/
 │   ├── tasks/
 │   ├── projects/
@@ -314,4 +315,30 @@ PostgreSQL
 ```
 
 The goal is to replace the persistence implementation rather than rewrite the application.
+
+---
+
+# 13. Authentication
+
+Google authentication is provided by Supabase Auth.
+
+It is used for identity only.
+
+Application data does not flow through Supabase; it stays in local browser storage.
+
+```text
+Login Page
+ ↓
+AuthProvider (context)
+ ↓
+Supabase Auth (Google OAuth)
+```
+
+Responsibilities:
+
+* `AuthProvider` — loads the session on startup, subscribes to auth state changes, exposes the signed-in user, and provides `signInWithGoogle()` and `signOut()`
+* `RequireAuth` (route guard) — redirects unauthenticated users to `/login`
+* Supabase browser client — created in `src/utils/supabase/client.ts` from `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`
+
+Supabase is a sign-in provider, not a data provider. The persistence layer and its repository pattern remain unchanged.
 

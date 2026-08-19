@@ -1,10 +1,77 @@
+import { useState } from 'react'
 import { NavLink, Navigate, Outlet, useLocation } from 'react-router-dom'
+import { LogOut } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useData } from '@/app/providers/data-provider'
+import { useAuth } from '@/app/providers/auth-provider'
 import { navItems } from '@/app/routes/navigation'
 import { LoadingScreen } from '@/components/shared/loading-screen'
 import { ThemeToggle } from '@/components/shared/theme-toggle'
 import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+
+function UserMenu() {
+  const { user, signOut } = useAuth()
+  const [signingOut, setSigningOut] = useState(false)
+
+  if (!user) return null
+
+  const name = user.user_metadata?.full_name ?? user.email
+  const avatarUrl = user.user_metadata?.avatar_url
+  const initial = typeof name === 'string' && name.length > 0 ? name.charAt(0).toUpperCase() : ''
+
+  async function handleSignOut() {
+    setSigningOut(true)
+    try {
+      await signOut()
+    } catch {
+      setSigningOut(false)
+    }
+  }
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          type="button"
+          aria-label="Account menu"
+          className="flex items-center gap-2 rounded-lg p-1 text-sm transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+        >
+          {avatarUrl ? (
+            <img
+              src={avatarUrl}
+              alt=""
+              className="size-7 rounded-full bg-muted"
+              referrerPolicy="no-referrer"
+            />
+          ) : (
+            <span className="flex size-7 items-center justify-center rounded-full bg-muted text-xs font-semibold">
+              {initial}
+            </span>
+          )}
+          <span className="hidden max-w-32 truncate text-muted-foreground lg:inline">
+            {name}
+          </span>
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuLabel className="max-w-48 truncate">{user.email}</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem variant="destructive" onSelect={handleSignOut} disabled={signingOut}>
+          <LogOut aria-hidden="true" />
+          {signingOut ? 'Signing out…' : 'Sign out'}
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
+}
 
 function SidebarNav() {
   return (
@@ -32,7 +99,18 @@ function SidebarNav() {
 
 export function AppLayout() {
   const { ready, profile } = useData()
+  const { signOut } = useAuth()
   const location = useLocation()
+  const [signingOut, setSigningOut] = useState(false)
+
+  async function handleSignOut() {
+    setSigningOut(true)
+    try {
+      await signOut()
+    } catch {
+      setSigningOut(false)
+    }
+  }
 
   if (!ready) return <LoadingScreen />
   if (!profile) return <Navigate to="/profile" replace state={{ from: location.pathname }} />
@@ -44,18 +122,39 @@ export function AppLayout() {
           <p className="mb-6 px-3 text-lg font-semibold tracking-tight">TimeBlocking</p>
           <SidebarNav />
         </div>
-        <div className="flex items-center justify-between border-t px-3 pt-4">
-          <p className="truncate text-sm text-muted-foreground">
-            {profile?.name ? `Hi, ${profile.name}` : 'Hi'}
-          </p>
-          <ThemeToggle />
+        <div className="space-y-3 border-t px-1 pt-3">
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full"
+            onClick={handleSignOut}
+            disabled={signingOut}
+          >
+            <LogOut aria-hidden="true" />
+            {signingOut ? 'Signing out…' : 'Sign out'}
+          </Button>
+          <div className="flex items-center justify-between px-2">
+            <UserMenu />
+            <ThemeToggle />
+          </div>
         </div>
       </aside>
 
       <div className="flex min-h-svh flex-col">
         <header className="sticky top-0 z-30 flex items-center justify-between border-b bg-background/95 px-4 py-3 backdrop-blur md:hidden">
           <p className="font-semibold tracking-tight">TimeBlocking</p>
-          <ThemeToggle />
+          <div className="flex items-center gap-1">
+            <Button
+              variant="outline"
+              size="icon-sm"
+              onClick={handleSignOut}
+              disabled={signingOut}
+              aria-label="Sign out"
+            >
+              <LogOut aria-hidden="true" />
+            </Button>
+            <ThemeToggle />
+          </div>
         </header>
 
         <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 md:px-8 md:py-8">

@@ -72,6 +72,8 @@ The user can:
 V1 must include:
 
 * Local profile
+* Google sign in / sign up
+* Sign out
 * Calendar
 * Day view
 * Week view
@@ -104,11 +106,10 @@ V1 must include:
 
 Do NOT implement:
 
-* Supabase
 * PostgreSQL
 * Backend
 * Cloud synchronization
-* Real authentication
+* Multi-device sync
 * Google Calendar integration
 * Apple Calendar integration
 * Outlook integration
@@ -117,6 +118,8 @@ Do NOT implement:
 * Shared calendars
 
 These belong to future versions.
+
+Authentication via Supabase (Google OAuth) is implemented for identity only. All application data remains local in the browser.
 
 ---
 
@@ -132,11 +135,13 @@ Ask for:
 * Timezone
 * Time format
 
+When the user signs in with Google, the name and email fields are pre-filled from the Google account.
+
 The profile is local only.
 
 Do not store passwords.
 
-Do not implement fake authentication.
+Google authentication (Supabase) is used for sign-in identity only and must not be described as secure account authentication.
 
 ---
 
@@ -524,7 +529,6 @@ Support:
 
 The architecture should make it possible to add:
 
-* Supabase Auth
 * PostgreSQL
 * Cloud sync
 * Multi-device sync

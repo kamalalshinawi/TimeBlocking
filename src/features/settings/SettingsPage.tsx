@@ -1,8 +1,9 @@
 import { useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Download, RefreshCcw, Trash2, User } from 'lucide-react'
+import { Download, LogOut, RefreshCcw, Trash2, User } from 'lucide-react'
 import { useData } from '@/app/providers/data-provider'
 import { useTheme } from '@/app/providers/theme-provider'
+import { useAuth } from '@/app/providers/auth-provider'
 import { useToast } from '@/components/shared/toast'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -29,9 +30,21 @@ import type { ThemePreference } from '@/domain/types'
 export function SettingsPage() {
   const { profile, exportData, importData, clearAllData } = useData()
   const { theme, setTheme } = useTheme()
+  const { user, signOut } = useAuth()
   const { toast } = useToast()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [importing, setImporting] = useState(false)
+  const [signingOut, setSigningOut] = useState(false)
+
+  async function handleSignOut() {
+    setSigningOut(true)
+    try {
+      await signOut()
+    } catch {
+      toast('Could not sign out', 'destructive')
+      setSigningOut(false)
+    }
+  }
 
   function handleExport() {
     const blob = new Blob([exportData()], { type: 'application/json' })
@@ -68,6 +81,27 @@ export function SettingsPage() {
   return (
     <div className="space-y-6">
       <h1 className="text-xl font-semibold">Settings</h1>
+
+      {user ? (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <LogOut aria-hidden="true" className="size-4" />
+              Account
+            </CardTitle>
+            <CardDescription>Your Google account used to sign in.</CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-wrap items-center justify-between gap-3">
+            <div className="min-w-0">
+              <p className="truncate font-medium">{user.email}</p>
+              <p className="text-sm text-muted-foreground">Signed in with Google</p>
+            </div>
+            <Button variant="outline" size="sm" onClick={handleSignOut} disabled={signingOut}>
+              {signingOut ? 'Signing out…' : 'Sign out'}
+            </Button>
+          </CardContent>
+        </Card>
+      ) : null}
 
       <Card>
         <CardHeader>

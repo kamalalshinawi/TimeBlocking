@@ -1,6 +1,7 @@
 import { useMemo, useState, type FormEvent } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useData } from '@/app/providers/data-provider'
+import { useAuth } from '@/app/providers/auth-provider'
 import { useTheme } from '@/app/providers/theme-provider'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -19,12 +20,19 @@ import type { ThemePreference, TimeFormat } from '@/domain/types'
 
 export function ProfilePage() {
   const { profile, saveProfile, ready } = useData()
+  const { user: authUser } = useAuth()
   const { setTheme } = useTheme()
   const navigate = useNavigate()
   const location = useLocation()
 
-  const [name, setName] = useState(profile?.name ?? '')
-  const [email, setEmail] = useState(profile?.email ?? '')
+  const googleName =
+    typeof authUser?.user_metadata?.full_name === 'string'
+      ? authUser.user_metadata.full_name
+      : ''
+  const googleEmail = authUser?.email ?? ''
+
+  const [name, setName] = useState(profile?.name ?? googleName)
+  const [email, setEmail] = useState(profile?.email ?? googleEmail)
   const [timezone, setTimezone] = useState(profile?.timezone ?? detectTimezone())
   const [timeFormat, setTimeFormat] = useState<TimeFormat>(
     profile?.timeFormat ?? detectDefaultTimeFormat(),

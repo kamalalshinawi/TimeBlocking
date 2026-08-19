@@ -150,13 +150,11 @@ Fix errors rather than ignoring them.
 
 # 6. V1 Architecture
 
-TimeBlocking V1 is a **local-first browser application**.
+TimeBlocking V1 is a local-first browser application.
 
 Do NOT introduce:
 
-* Supabase
 * PostgreSQL
-* Firebase
 * backend servers
 * external databases
 * cloud synchronization
@@ -164,11 +162,11 @@ Do NOT introduce:
 
 All user data must remain in the browser.
 
+Google authentication (Supabase Auth) is allowed and implemented. It provides identity only and never stores or receives application data.
+
 ---
 
 # 7. Local Profile
-
-V1 does not have real authentication.
 
 The user has a local profile.
 
@@ -181,13 +179,13 @@ The profile may contain:
 * time format
 * preferences
 
+Sign-in identity comes from Google authentication (Supabase Auth).
+
 DO NOT implement passwords.
 
 DO NOT store passwords in localStorage.
 
 DO NOT describe the local profile as secure authentication.
-
-Real authentication will be introduced in a future version.
 
 ---
 

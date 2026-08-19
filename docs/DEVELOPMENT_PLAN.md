@@ -12,6 +12,8 @@ After a phase is verified and accepted, move to the next phase.
 
 Phases 0 through 12 are implemented and verified.
 
+Google authentication with Supabase (sign in, sign up, sign out) has been implemented on top of the completed phases. It provides identity only; all application data remains local.
+
 Phase 13 lists future features and must not be implemented in V1.
 
 ---
@@ -431,8 +433,6 @@ Do not implement yet.
 
 Potential future work:
 
-* Supabase
-* real authentication
 * cloud sync
 * multi-device sync
 * notifications
@@ -443,6 +443,8 @@ Potential future work:
 * AI scheduling
 * shared calendars
 * team collaboration
+
+Google authentication (Supabase Auth) is already implemented and is not part of this phase.
 
 ### Acceptance Criteria
 
