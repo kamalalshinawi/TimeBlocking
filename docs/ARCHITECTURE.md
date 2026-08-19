@@ -41,12 +41,16 @@ src/
 │   ├── projects/
 │   ├── dashboard/
 │   ├── today/
+│   ├── habits/                  (habit tracker)
+│   ├── pomodoro/                (pomodoro timer)
 │   ├── profile/
 │   └── settings/
 │
 ├── domain/
 │   ├── types.ts                 (shared domain models)
-│   └── time-blocks/             (state engine, time math, conflicts, operations)
+│   ├── time-blocks/             (state engine, time math, conflicts, operations)
+│   ├── habits/                  (scheduling, streaks, stats)
+│   └── pomodoro/                (timer engine, session stats)
 │
 ├── repositories/
 │   ├── interfaces/

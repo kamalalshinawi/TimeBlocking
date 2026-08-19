@@ -1,4 +1,4 @@
-import type { Category, Priority, Project, Task, TimeBlock, UserProfile } from '@/domain/types'
+import type { Category, Habit, HabitCompletion, HabitFrequency, Priority, Project, Task, TimeBlock, UserProfile } from '@/domain/types'
 
 export interface TaskRepository {
   getAll(): Promise<Task[]>
@@ -37,6 +37,21 @@ export interface ProfileRepository {
   save(profile: UserProfile): Promise<UserProfile>
 }
 
+export interface HabitRepository {
+  getAll(): Promise<Habit[]>
+  getById(id: string): Promise<Habit | null>
+  create(input: NewHabit): Promise<Habit>
+  update(habit: Habit): Promise<Habit>
+  delete(id: string): Promise<void>
+}
+
+export interface HabitCompletionRepository {
+  getAll(): Promise<HabitCompletion[]>
+  create(input: NewHabitCompletion): Promise<HabitCompletion>
+  delete(id: string): Promise<void>
+  deleteForHabit(habitId: string): Promise<void>
+}
+
 export interface NewTask {
   title: string
   description?: string
@@ -62,4 +77,19 @@ export interface NewProject {
 export interface NewCategory {
   name: string
   color?: string
+}
+
+export interface NewHabit {
+  name: string
+  description?: string
+  color?: string
+  icon?: string
+  frequency?: HabitFrequency
+  daysOfWeek?: number[]
+  weeklyTarget?: number
+}
+
+export interface NewHabitCompletion {
+  habitId: string
+  date: string
 }

@@ -3,6 +3,7 @@ import {
   CheckSquare,
   FolderKanban,
   LayoutDashboard,
+  Repeat,
   Settings,
   Sun,
 } from 'lucide-react'
@@ -20,6 +21,7 @@ export const navItems: NavItem[] = [
   { to: '/today', label: 'Today', icon: Sun },
   { to: '/calendar', label: 'Calendar', icon: CalendarDays },
   { to: '/tasks', label: 'Tasks', icon: CheckSquare },
+  { to: '/habits', label: 'Habits', icon: Repeat },
   { to: '/projects', label: 'Projects', icon: FolderKanban },
   { to: '/settings', label: 'Settings', icon: Settings },
 ]

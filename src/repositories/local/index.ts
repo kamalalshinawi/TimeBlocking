@@ -1,6 +1,8 @@
 import type { StorageAdapter } from '@/storage/adapter'
 import type {
   CategoryRepository,
+  HabitCompletionRepository,
+  HabitRepository,
   ProfileRepository,
   ProjectRepository,
   TaskRepository,
@@ -13,6 +15,10 @@ import {
   createLocalProfileRepository,
   createLocalProjectRepository,
 } from '@/repositories/local/project-category-profile-repositories'
+import {
+  createLocalHabitCompletionRepository,
+  createLocalHabitRepository,
+} from '@/repositories/local/habit-repository'
 
 export interface Repositories {
   task: TaskRepository
@@ -20,6 +26,8 @@ export interface Repositories {
   project: ProjectRepository
   category: CategoryRepository
   profile: ProfileRepository
+  habit: HabitRepository
+  habitCompletion: HabitCompletionRepository
 }
 
 export function createRepositories(adapter: StorageAdapter): Repositories {
@@ -29,5 +37,7 @@ export function createRepositories(adapter: StorageAdapter): Repositories {
     project: createLocalProjectRepository(adapter),
     category: createLocalCategoryRepository(adapter),
     profile: createLocalProfileRepository(adapter),
+    habit: createLocalHabitRepository(adapter),
+    habitCompletion: createLocalHabitCompletionRepository(adapter),
   }
 }

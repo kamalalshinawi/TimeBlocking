@@ -1,7 +1,7 @@
-import type { Category, Project, Task, TimeBlock, UserProfile } from '@/domain/types'
+import type { Category, Habit, HabitCompletion, Project, Task, TimeBlock, UserProfile } from '@/domain/types'
 import type { StorageAdapter } from '@/storage/adapter'
 
-export const DATABASE_VERSION = 1
+export const DATABASE_VERSION = 2
 export const DATABASE_KEY = 'timeblocking.db'
 
 export interface Database {
@@ -11,6 +11,8 @@ export interface Database {
   timeBlocks: TimeBlock[]
   projects: Project[]
   categories: Category[]
+  habits: Habit[]
+  habitCompletions: HabitCompletion[]
 }
 
 export function createEmptyDatabase(): Database {
@@ -21,6 +23,8 @@ export function createEmptyDatabase(): Database {
     timeBlocks: [],
     projects: [],
     categories: [],
+    habits: [],
+    habitCompletions: [],
   }
 }
 
@@ -76,13 +80,17 @@ export function loadDatabase(adapter: StorageAdapter): Database {
 }
 
 function migrateDatabase(database: Database): Database {
-  return {
+  const migrated: Database = {
     ...database,
     tasks: database.tasks.map((task) => ({
       ...task,
       completedAt: task.completedAt ?? null,
     })),
+    habits: database.habits ?? [],
+    habitCompletions: database.habitCompletions ?? [],
   }
+  migrated.version = DATABASE_VERSION
+  return migrated
 }
 
 export function saveDatabase(adapter: StorageAdapter, database: Database): void {

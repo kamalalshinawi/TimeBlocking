@@ -94,6 +94,8 @@ V1 must include:
 * Reschedule task
 * Today view
 * Dashboard
+* Habit tracker
+* Pomodoro timer
 * Local persistence
 * Export data
 * Import data
@@ -540,4 +542,107 @@ The architecture should make it possible to add:
 * shared calendars
 
 Do not implement these now.
+
+---
+
+# 28. Habit Tracker
+
+The habit tracker helps the user build repeatable routines.
+
+## 28.1 Habit
+
+A habit has:
+
+* name
+* description
+* color
+* icon
+* frequency (`daily`, `weekly`, `custom`)
+* `daysOfWeek` for custom frequency
+* `weeklyTarget` for weekly frequency
+* archived flag
+* createdAt / updatedAt
+
+## 28.2 Completion
+
+A completion is recorded per habit and local calendar day (`yyyy-MM-dd`).
+
+Toggling a day on and off adds or removes the completion.
+
+## 28.3 Statistics
+
+Derived from habits and completions:
+
+* current streak (consecutive scheduled days completed)
+* longest streak
+* best streak (current vs longest)
+* completion rate over a date range
+* weekly target progress
+* 12-week heatmap
+
+Streaks only count scheduled days and are broken by a missed scheduled day.
+
+## 28.4 Habit Tracker Page
+
+The Habits page shows:
+
+* summary stats (active habits, done today, best streak, 7-day completion)
+* today's due habits with quick check-off
+* all habits with streaks, completion rate, and heatmap
+* create / edit / archive / restore / delete
+* archived habits grouped separately
+
+---
+
+# 29. Pomodoro Timer
+
+The pomodoro timer supports focused work sessions with breaks.
+
+## 29.1 Phases
+
+* Focus
+* Short break
+* Long break (after a configurable number of focus sessions)
+
+## 29.2 Timer
+
+The timer is timestamp-based:
+
+* a session records its planned duration and when it started
+* remaining time is derived from `plannedEnd - now`
+* it survives refresh, tab switching, and computer sleep
+* pause/resume accumulate elapsed time without losing state
+
+## 29.3 Settings
+
+* focus / short break / long break durations
+* long break interval (focus sessions before a long break)
+* auto-start breaks
+* auto-start focus
+* daily focus goal
+* sound on completion
+
+## 29.4 Sessions
+
+Completed focus sessions are recorded with:
+
+* phase
+* linked task (optional)
+* planned minutes
+* startedAt / endedAt
+
+Daily statistics are derived from completed focus sessions.
+
+## 29.5 Pomodoro Page
+
+The Pomodoro page shows:
+
+* phase indicator
+* live countdown and progress ring
+* start / pause / resume / skip / reset controls
+* session counter (focus sessions before the next long break)
+* task selector to link a focus session
+* daily focus statistics
+* settings dialog
+* recent session history
 

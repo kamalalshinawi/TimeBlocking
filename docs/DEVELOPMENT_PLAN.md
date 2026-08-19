@@ -16,6 +16,13 @@ Google authentication with Supabase (sign in, sign up, sign out) has been implem
 
 Phase 13 lists future features and must not be implemented in V1.
 
+Two additional features have been implemented on top of the completed phases:
+
+* **Habit Tracker** (feature 14) — habits with daily/weekly/custom frequencies, completions, streaks, completion statistics, and a heatmap. Storage schema version 2.
+* **Pomodoro Timer** (feature 15) — timestamp-based focus/break timer with pause/resume, task linking, settings, daily statistics, and session history. Storage schema version 3.
+
+Both features follow the same architecture (feature folder, domain logic with unit tests, repository layer, DataProvider).
+
 ---
 
 # Phase 0 — Project Foundation
