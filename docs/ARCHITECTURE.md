@@ -22,45 +22,41 @@ Local Storage
 
 Use a feature-oriented structure where practical.
 
+The current V1 structure:
+
 ```text
 src/
 ├── app/
-│   ├── routes/
-│   └── providers/
+│   ├── routes/                  (routing, layout, navigation)
+│   └── providers/               (data provider, theme provider)
 │
 ├── components/
-│   ├── ui/
-│   └── shared/
+│   ├── ui/                      (shadcn/ui primitives)
+│   └── shared/                  (countdown, status badge, actions, toast, empty states)
 │
 ├── features/
 │   ├── calendar/
 │   ├── tasks/
 │   ├── projects/
-│   ├── categories/
 │   ├── dashboard/
+│   ├── today/
 │   ├── profile/
 │   └── settings/
 │
 ├── domain/
-│   ├── tasks/
-│   ├── time-blocks/
-│   ├── projects/
-│   └── calendar/
+│   ├── types.ts                 (shared domain models)
+│   └── time-blocks/             (state engine, time math, conflicts, operations)
 │
 ├── repositories/
 │   ├── interfaces/
 │   └── local/
 │
-├── storage/
+├── storage/                     (adapter + database schema + versioning)
 │
 ├── hooks/
 │
 ├── utils/
-│   ├── date/
-│   ├── time/
-│   └── validation/
-│
-├── types/
+│   └── date/
 │
 └── lib/
 ```

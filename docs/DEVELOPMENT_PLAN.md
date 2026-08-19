@@ -8,6 +8,12 @@ Do not build multiple phases at once.
 
 After a phase is verified and accepted, move to the next phase.
 
+## Status
+
+Phases 0 through 12 are implemented and verified.
+
+Phase 13 lists future features and must not be implemented in V1.
+
 ---
 
 # Phase 0 — Project Foundation

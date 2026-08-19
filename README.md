@@ -13,9 +13,11 @@ You can **complete**, **extend**, or **reschedule** every block.
 
 ## Current Status
 
-**Phase 0 — Project Foundation** is in progress.
+**Phases 0–12 are implemented** (project foundation through polish).
 
-The project foundation and documentation are established. No product features (calendar, tasks, countdown, dashboard) are implemented yet.
+The application supports local profiles, calendar day/week/month views with drag-and-resize and conflict detection, a time-block state engine, live countdowns, task execution (complete/extend/reschedule), task management (projects, categories, priorities, subtasks), a dashboard, a today view, and JSON import/export.
+
+Phase 13 (Supabase, cloud sync, calendar integrations, AI scheduling) is intentionally **not implemented** yet.
 
 ## Technology
 
@@ -74,22 +76,22 @@ npm run dev     # start the dev server
 
 ## Roadmap
 
-| Phase | Scope |
-| --- | --- |
-| 0 | Project Foundation |
-| 1 | Local Profile |
-| 2 | Local Data Layer |
-| 3 | Calendar MVP |
-| 4 | Calendar Interaction |
-| 5 | Time Block State Engine |
-| 6 | Countdown |
-| 7 | Task Execution |
-| 8 | Task Management |
-| 9 | Dashboard |
-| 10 | Today View |
-| 11 | Import/Export |
-| 12 | Polish, Responsive Design & Accessibility |
-| 13 | Future Features |
+| Phase | Scope | Status |
+| --- | --- | --- |
+| 0 | Project Foundation | ✅ |
+| 1 | Local Profile | ✅ |
+| 2 | Local Data Layer | ✅ |
+| 3 | Calendar MVP | ✅ |
+| 4 | Calendar Interaction | ✅ |
+| 5 | Time Block State Engine | ✅ |
+| 6 | Countdown | ✅ |
+| 7 | Task Execution | ✅ |
+| 8 | Task Management | ✅ |
+| 9 | Dashboard | ✅ |
+| 10 | Today View | ✅ |
+| 11 | Import/Export | ✅ |
+| 12 | Polish, Responsive Design & Accessibility | ✅ |
+| 13 | Future Features | ⏳ planned |
 
 Full details in [docs/DEVELOPMENT_PLAN.md](docs/DEVELOPMENT_PLAN.md).
 
