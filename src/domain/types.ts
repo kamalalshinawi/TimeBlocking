@@ -88,3 +88,36 @@ export interface HabitCompletion {
   date: string
   completedAt: string
 }
+
+export type PomodoroPhase = 'focus' | 'short-break' | 'long-break'
+export type PomodoroStatus = 'idle' | 'running' | 'paused' | 'completed'
+
+export interface PomodoroSettings {
+  focusMinutes: number
+  shortBreakMinutes: number
+  longBreakMinutes: number
+  longBreakInterval: number
+  autoStartBreaks: boolean
+  autoStartFocus: boolean
+  dailyFocusGoal: number
+  soundEnabled: boolean
+}
+
+export interface PomodoroSession {
+  id: string
+  phase: PomodoroPhase
+  taskId: string | null
+  plannedSeconds: number
+  accumulatedSeconds: number
+  startedAt: string | null
+  pausedAt: string | null
+  status: PomodoroStatus
+  completedAt: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export interface PomodoroState {
+  activeSession: PomodoroSession | null
+  focusCycleCount: number
+}

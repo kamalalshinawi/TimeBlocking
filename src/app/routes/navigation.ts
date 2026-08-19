@@ -6,6 +6,7 @@ import {
   Repeat,
   Settings,
   Sun,
+  Timer,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
@@ -22,6 +23,7 @@ export const navItems: NavItem[] = [
   { to: '/calendar', label: 'Calendar', icon: CalendarDays },
   { to: '/tasks', label: 'Tasks', icon: CheckSquare },
   { to: '/habits', label: 'Habits', icon: Repeat },
+  { to: '/pomodoro', label: 'Pomodoro', icon: Timer },
   { to: '/projects', label: 'Projects', icon: FolderKanban },
   { to: '/settings', label: 'Settings', icon: Settings },
 ]

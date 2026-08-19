@@ -1,7 +1,18 @@
-import type { Category, Habit, HabitCompletion, Project, Task, TimeBlock, UserProfile } from '@/domain/types'
+import type {
+  Category,
+  Habit,
+  HabitCompletion,
+  PomodoroSession,
+  PomodoroSettings,
+  PomodoroState,
+  Project,
+  Task,
+  TimeBlock,
+  UserProfile,
+} from '@/domain/types'
 import type { StorageAdapter } from '@/storage/adapter'
 
-export const DATABASE_VERSION = 2
+export const DATABASE_VERSION = 3
 export const DATABASE_KEY = 'timeblocking.db'
 
 export interface Database {
@@ -13,6 +24,24 @@ export interface Database {
   categories: Category[]
   habits: Habit[]
   habitCompletions: HabitCompletion[]
+  pomodoroSettings: PomodoroSettings
+  pomodoroSessions: PomodoroSession[]
+  activePomodoro: PomodoroState
+}
+
+export const DEFAULT_POMODORO_SETTINGS: PomodoroSettings = {
+  focusMinutes: 25,
+  shortBreakMinutes: 5,
+  longBreakMinutes: 15,
+  longBreakInterval: 4,
+  autoStartBreaks: false,
+  autoStartFocus: false,
+  dailyFocusGoal: 8,
+  soundEnabled: true,
+}
+
+export function createEmptyPomodoroState(): PomodoroState {
+  return { activeSession: null, focusCycleCount: 0 }
 }
 
 export function createEmptyDatabase(): Database {
@@ -25,6 +54,9 @@ export function createEmptyDatabase(): Database {
     categories: [],
     habits: [],
     habitCompletions: [],
+    pomodoroSettings: { ...DEFAULT_POMODORO_SETTINGS },
+    pomodoroSessions: [],
+    activePomodoro: createEmptyPomodoroState(),
   }
 }
 
@@ -88,6 +120,9 @@ function migrateDatabase(database: Database): Database {
     })),
     habits: database.habits ?? [],
     habitCompletions: database.habitCompletions ?? [],
+    pomodoroSettings: database.pomodoroSettings ?? { ...DEFAULT_POMODORO_SETTINGS },
+    pomodoroSessions: database.pomodoroSessions ?? [],
+    activePomodoro: database.activePomodoro ?? createEmptyPomodoroState(),
   }
   migrated.version = DATABASE_VERSION
   return migrated

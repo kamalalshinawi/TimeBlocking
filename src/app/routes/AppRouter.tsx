@@ -11,6 +11,7 @@ import { CalendarPage } from '@/features/calendar/CalendarPage'
 import { TasksPage } from '@/features/tasks/TasksPage'
 import { ProjectsPage } from '@/features/projects/ProjectsPage'
 import { HabitsPage } from '@/features/habits/HabitsPage'
+import { PomodoroPage } from '@/features/pomodoro/PomodoroPage'
 import { SettingsPage } from '@/features/settings/SettingsPage'
 
 function HomeRedirect() {
@@ -40,6 +41,7 @@ export function AppRouter() {
             <Route path="/calendar" element={<CalendarPage />} />
             <Route path="/tasks" element={<TasksPage />} />
             <Route path="/habits" element={<HabitsPage />} />
+            <Route path="/pomodoro" element={<PomodoroPage />} />
             <Route path="/projects" element={<ProjectsPage />} />
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="*" element={<NotFoundPage />} />

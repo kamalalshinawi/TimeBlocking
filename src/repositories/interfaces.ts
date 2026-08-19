@@ -1,4 +1,17 @@
-import type { Category, Habit, HabitCompletion, HabitFrequency, Priority, Project, Task, TimeBlock, UserProfile } from '@/domain/types'
+import type {
+  Category,
+  Habit,
+  HabitCompletion,
+  HabitFrequency,
+  PomodoroSession,
+  PomodoroSettings,
+  PomodoroState,
+  Priority,
+  Project,
+  Task,
+  TimeBlock,
+  UserProfile,
+} from '@/domain/types'
 
 export interface TaskRepository {
   getAll(): Promise<Task[]>
@@ -50,6 +63,21 @@ export interface HabitCompletionRepository {
   create(input: NewHabitCompletion): Promise<HabitCompletion>
   delete(id: string): Promise<void>
   deleteForHabit(habitId: string): Promise<void>
+}
+
+export interface PomodoroSettingsRepository {
+  get(): Promise<PomodoroSettings>
+  save(settings: PomodoroSettings): Promise<PomodoroSettings>
+}
+
+export interface PomodoroSessionRepository {
+  getAll(): Promise<PomodoroSession[]>
+  create(session: PomodoroSession): Promise<PomodoroSession>
+}
+
+export interface ActivePomodoroRepository {
+  get(): Promise<PomodoroState>
+  save(state: PomodoroState): Promise<PomodoroState>
 }
 
 export interface NewTask {

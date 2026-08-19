@@ -7,9 +7,28 @@ import {
   useState,
   type ReactNode,
 } from 'react'
-import type { Category, Habit, HabitCompletion, Project, Task, TimeBlock, UserProfile } from '@/domain/types'
+import type {
+  Category,
+  Habit,
+  HabitCompletion,
+  PomodoroSession,
+  PomodoroSettings,
+  PomodoroState,
+  Project,
+  Task,
+  TimeBlock,
+  UserProfile,
+} from '@/domain/types'
 import { createLocalStorageAdapter } from '@/storage/adapter'
-import { createEmptyDatabase, isValidDatabase, loadDatabase, nowIso, saveDatabase } from '@/storage/database'
+import {
+  createEmptyDatabase,
+  createEmptyPomodoroState,
+  DEFAULT_POMODORO_SETTINGS,
+  isValidDatabase,
+  loadDatabase,
+  nowIso,
+  saveDatabase,
+} from '@/storage/database'
 import { createRepositories } from '@/repositories/local'
 import type {
   NewCategory,
@@ -19,6 +38,14 @@ import type {
   NewTimeBlock,
 } from '@/repositories/interfaces'
 import { completeTimeBlock, extendTimeBlock, rescheduleTimeBlock } from '@/domain/time-blocks/operations'
+import {
+  createIdleSession,
+  pauseSession,
+  phaseDurationSeconds,
+  resumeSession,
+  startSession,
+  transitionPomodoro,
+} from '@/domain/pomodoro'
 
 interface DataContextValue {
   ready: boolean
@@ -57,6 +84,18 @@ interface DataContextValue {
   deleteHabit: (id: string) => Promise<void>
   toggleHabitCompletion: (habitId: string, date: string) => Promise<void>
 
+  pomodoroSettings: PomodoroSettings
+  pomodoroSessions: PomodoroSession[]
+  activePomodoro: PomodoroState
+  updatePomodoroSettings: (settings: PomodoroSettings) => Promise<void>
+  startPomodoro: (taskId?: string) => Promise<void>
+  pausePomodoro: () => Promise<void>
+  resumePomodoro: () => Promise<void>
+  finishPomodoro: () => Promise<void>
+  skipPomodoro: () => Promise<void>
+  resetPomodoro: () => Promise<void>
+  attachTaskToPomodoro: (taskId: string | null) => Promise<void>
+
   exportData: () => string
   importData: (json: string) => Promise<void>
   clearAllData: () => Promise<void>
@@ -76,20 +115,36 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [categories, setCategories] = useState<Category[]>([])
   const [habits, setHabits] = useState<Habit[]>([])
   const [habitCompletions, setHabitCompletions] = useState<HabitCompletion[]>([])
+  const [pomodoroSettings, setPomodoroSettings] = useState<PomodoroSettings>(() => ({ ...DEFAULT_POMODORO_SETTINGS }))
+  const [pomodoroSessions, setPomodoroSessions] = useState<PomodoroSession[]>([])
+  const [activePomodoro, setActivePomodoro] = useState<PomodoroState>(() => createEmptyPomodoroState())
 
   useEffect(() => {
     let cancelled = false
     async function load() {
-      const [profileResult, taskResult, blockResult, projectResult, categoryResult, habitResult, habitCompletionResult] =
-        await Promise.all([
-          repositories.profile.get(),
-          repositories.task.getAll(),
-          repositories.timeBlock.getAll(),
-          repositories.project.getAll(),
-          repositories.category.getAll(),
-          repositories.habit.getAll(),
-          repositories.habitCompletion.getAll(),
-        ])
+      const [
+        profileResult,
+        taskResult,
+        blockResult,
+        projectResult,
+        categoryResult,
+        habitResult,
+        habitCompletionResult,
+        pomodoroSettingsResult,
+        pomodoroSessionResult,
+        activePomodoroResult,
+      ] = await Promise.all([
+        repositories.profile.get(),
+        repositories.task.getAll(),
+        repositories.timeBlock.getAll(),
+        repositories.project.getAll(),
+        repositories.category.getAll(),
+        repositories.habit.getAll(),
+        repositories.habitCompletion.getAll(),
+        repositories.pomodoroSettings.get(),
+        repositories.pomodoroSession.getAll(),
+        repositories.activePomodoro.get(),
+      ])
       if (cancelled) return
       setProfile(profileResult)
       setTasks(taskResult)
@@ -98,6 +153,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
       setCategories(categoryResult)
       setHabits(habitResult)
       setHabitCompletions(habitCompletionResult)
+      setPomodoroSettings(pomodoroSettingsResult)
+      setPomodoroSessions(pomodoroSessionResult)
+      setActivePomodoro(activePomodoroResult)
       setReady(true)
     }
     void load()
@@ -124,6 +182,15 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const refreshHabitCompletions = useCallback(async () => {
     setHabitCompletions(await repositories.habitCompletion.getAll())
   }, [])
+  const refreshPomodoroSettings = useCallback(async () => {
+    setPomodoroSettings(await repositories.pomodoroSettings.get())
+  }, [])
+  const refreshPomodoroSessions = useCallback(async () => {
+    setPomodoroSessions(await repositories.pomodoroSession.getAll())
+  }, [])
+  const refreshActivePomodoro = useCallback(async () => {
+    setActivePomodoro(await repositories.activePomodoro.get())
+  }, [])
 
   const value = useMemo<DataContextValue>(() => {
     return {
@@ -135,6 +202,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
       categories,
       habits,
       habitCompletions,
+      pomodoroSettings,
+      pomodoroSessions,
+      activePomodoro,
 
       async saveProfile(newProfile) {
         await repositories.profile.save(newProfile)
@@ -274,6 +344,90 @@ export function DataProvider({ children }: { children: ReactNode }) {
         await refreshHabitCompletions()
       },
 
+      async updatePomodoroSettings(settings) {
+        await repositories.pomodoroSettings.save(settings)
+        const state = await repositories.activePomodoro.get()
+        if (state.activeSession && state.activeSession.status === 'idle') {
+          await repositories.activePomodoro.save({
+            ...state,
+            activeSession: {
+              ...state.activeSession,
+              plannedSeconds: phaseDurationSeconds(state.activeSession.phase, settings),
+              updatedAt: nowIso(),
+            },
+          })
+        }
+        await refreshPomodoroSettings()
+        await refreshActivePomodoro()
+      },
+      async startPomodoro(taskId) {
+        const state = await repositories.activePomodoro.get()
+        const settings = await repositories.pomodoroSettings.get()
+        let session = state.activeSession
+        if (!session) {
+          session = startSession(createIdleSession('focus', settings, taskId ?? null), new Date())
+          await repositories.activePomodoro.save({ ...state, activeSession: session })
+        } else if (session.status === 'idle') {
+          session = startSession(taskId !== undefined ? { ...session, taskId } : session, new Date())
+          await repositories.activePomodoro.save({ ...state, activeSession: session })
+        } else if (session.status === 'paused') {
+          await repositories.activePomodoro.save({
+            ...state,
+            activeSession: resumeSession(session, new Date()),
+          })
+        }
+        await refreshActivePomodoro()
+      },
+      async pausePomodoro() {
+        const state = await repositories.activePomodoro.get()
+        if (state.activeSession?.status !== 'running') return
+        await repositories.activePomodoro.save({
+          ...state,
+          activeSession: pauseSession(state.activeSession, new Date()),
+        })
+        await refreshActivePomodoro()
+      },
+      async resumePomodoro() {
+        const state = await repositories.activePomodoro.get()
+        if (state.activeSession?.status !== 'paused') return
+        await repositories.activePomodoro.save({
+          ...state,
+          activeSession: resumeSession(state.activeSession, new Date()),
+        })
+        await refreshActivePomodoro()
+      },
+      async finishPomodoro() {
+        const state = await repositories.activePomodoro.get()
+        const settings = await repositories.pomodoroSettings.get()
+        const result = transitionPomodoro(state, settings, new Date())
+        if (result.completed?.phase === 'focus') {
+          await repositories.pomodoroSession.create(result.completed)
+          await refreshPomodoroSessions()
+        }
+        await repositories.activePomodoro.save(result.state)
+        await refreshActivePomodoro()
+      },
+      async skipPomodoro() {
+        const state = await repositories.activePomodoro.get()
+        const settings = await repositories.pomodoroSettings.get()
+        const result = transitionPomodoro(state, settings, new Date())
+        await repositories.activePomodoro.save(result.state)
+        await refreshActivePomodoro()
+      },
+      async resetPomodoro() {
+        await repositories.activePomodoro.save(createEmptyPomodoroState())
+        await refreshActivePomodoro()
+      },
+      async attachTaskToPomodoro(taskId) {
+        const state = await repositories.activePomodoro.get()
+        if (!state.activeSession || state.activeSession.phase !== 'focus') return
+        await repositories.activePomodoro.save({
+          ...state,
+          activeSession: { ...state.activeSession, taskId, updatedAt: nowIso() },
+        })
+        await refreshActivePomodoro()
+      },
+
       exportData() {
         return JSON.stringify(loadDatabase(adapter), null, 2)
       },
@@ -283,7 +437,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
           throw new Error('Invalid backup file')
         }
         saveDatabase(adapter, parsed)
-        const [profileResult, taskResult, blockResult, projectResult, categoryResult, habitResult, habitCompletionResult] =
+        const [profileResult, taskResult, blockResult, projectResult, categoryResult, habitResult, habitCompletionResult, pomodoroSettingsResult, pomodoroSessionResult, activePomodoroResult] =
           await Promise.all([
             repositories.profile.get(),
             repositories.task.getAll(),
@@ -292,6 +446,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
             repositories.category.getAll(),
             repositories.habit.getAll(),
             repositories.habitCompletion.getAll(),
+            repositories.pomodoroSettings.get(),
+            repositories.pomodoroSession.getAll(),
+            repositories.activePomodoro.get(),
           ])
         setProfile(profileResult)
         setTasks(taskResult)
@@ -300,6 +457,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
         setCategories(categoryResult)
         setHabits(habitResult)
         setHabitCompletions(habitCompletionResult)
+        setPomodoroSettings(pomodoroSettingsResult)
+        setPomodoroSessions(pomodoroSessionResult)
+        setActivePomodoro(activePomodoroResult)
       },
       async clearAllData() {
         saveDatabase(adapter, createEmptyDatabase())
@@ -310,9 +470,12 @@ export function DataProvider({ children }: { children: ReactNode }) {
         setCategories([])
         setHabits([])
         setHabitCompletions([])
+        setPomodoroSettings({ ...DEFAULT_POMODORO_SETTINGS })
+        setPomodoroSessions([])
+        setActivePomodoro(createEmptyPomodoroState())
       },
     }
-  }, [ready, profile, tasks, timeBlocks, projects, categories, habits, habitCompletions, refreshTasks, refreshTimeBlocks, refreshProjects, refreshCategories, refreshHabits, refreshHabitCompletions])
+  }, [ready, profile, tasks, timeBlocks, projects, categories, habits, habitCompletions, pomodoroSettings, pomodoroSessions, activePomodoro, refreshTasks, refreshTimeBlocks, refreshProjects, refreshCategories, refreshHabits, refreshHabitCompletions, refreshPomodoroSettings, refreshPomodoroSessions, refreshActivePomodoro])
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>
 }
